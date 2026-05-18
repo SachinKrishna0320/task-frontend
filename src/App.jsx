@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import './App.css';
 
-const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const apiBase = import.meta.env.VITE_API_URL || 'http://13.49.137.26:3001';
 
 async function api(path, options) {
   const res = await fetch(`${apiBase}${path}`, {
