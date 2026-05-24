@@ -1,7 +1,23 @@
 import { useCallback, useState } from 'react';
 import './App.css';
 
-const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+/** Use same host as the page in the browser (fixes EC2 deploy where localhost is wrong). */
+function resolveApiBase() {
+  const fromEnv = import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    if (
+      !fromEnv ||
+      fromEnv.includes('localhost') ||
+      fromEnv.includes('127.0.0.1')
+    ) {
+      return `${protocol}//${hostname}:3001`;
+    }
+  }
+  return fromEnv || 'http://localhost:3001';
+}
+
+const apiBase = resolveApiBase();
 
 async function api(path, options) {
   const res = await fetch(`${apiBase}${path}`, {
