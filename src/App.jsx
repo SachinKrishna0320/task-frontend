@@ -194,7 +194,7 @@ export default function App() {
             ) : (
               <>
                 <button type="button" className="btn btn--ghost" onClick={hideData} disabled={busy}>
-                  Hide data
+                  Hide the data
                 </button>
                 <button
                   type="button"
