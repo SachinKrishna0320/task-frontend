@@ -9,7 +9,7 @@ env:
   AWS_REGION: eu-north-1
   ECR_REPOSITORY: task/frontend
   ECS_CLUSTER: tas-ecs-cluster
-  ECS_SERVICE: task-frontend-td-service
+  ECS_SERVICE: task-frontend-td-service-bsgh8k49
   TASK_DEFINITION_FAMILY: task-frontend-td
 
 jobs:
