@@ -1,26 +1,47 @@
 import { useCallback, useState } from 'react';
 import './App.css';
 
-/** Use same host as the page in the browser (fixes EC2 deploy where localhost is wrong). */
+/**
+ * Backend base URL for API calls.
+ * - VITE_API_URL (build-time): use when frontend and backend are on different hosts (e.g. separate ALBs).
+ * - Local dev: http://localhost:3001 (or same host on port 3001).
+ * - ECS / ALB without VITE_API_URL: same origin (empty base) — ALB must route /api/* to the backend.
+ */
 function resolveApiBase() {
-  const fromEnv = import.meta.env.VITE_API_URL;
+  const fromEnv = import.meta.env.VITE_API_URL?.trim();
+  if (fromEnv) {
+    return fromEnv.replace(/\/$/, '');
+  }
+
   if (typeof window !== 'undefined') {
     const { protocol, hostname } = window.location;
-    if (
-      !fromEnv ||
-      fromEnv.includes('localhost') ||
-      fromEnv.includes('127.0.0.1')
-    ) {
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (isLocal) {
       return `${protocol}//${hostname}:3001`;
     }
+    return '';
   }
-  return fromEnv || 'http://localhost:3001';
+
+  return 'http://localhost:3001';
 }
 
-const apiBase = resolveApiBase();
+function buildApiUrl(path) {
+  const base = resolveApiBase();
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return base ? `${base}${normalizedPath}` : normalizedPath;
+}
+
+function apiBaseLabel() {
+  const base = resolveApiBase();
+  if (base) return base;
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin} (same origin)`;
+  }
+  return '(same origin)';
+}
 
 async function api(path, options) {
-  const res = await fetch(`${apiBase}${path}`, {
+  const res = await fetch(buildApiUrl(path), {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -158,7 +179,7 @@ export default function App() {
           </p>
           <div className="hero__meta">
             <span className="badge">
-              API <strong>{apiBase}</strong>
+              API <strong>{apiBaseLabel()}</strong>
             </span>
             <span className="stack-pill">React · Vite · Express · MongoDB</span>
           </div>
